@@ -13,22 +13,24 @@ Course Project 1 Overview:
 
 ## Loading and preprocessing the data
 
-```{r}
+```{r filein}
 file_in <- "activity.csv" 
 activity <- read.csv(file_in)
+library(lattice)
 ```
 
 
 ## What is mean total number of steps taken per day?
 
 
-```{r}
-    
- #split file by date into list
+```{r mean_activity}
+    # split file by date into list
     StepsByDay <- with(activity, split(steps, date))
+
     #apply sum function over each element (day) in list for total steps
     #return vector for plotting & later calcs
     SumPerDay <- sapply(StepsByDay,sum, na.rm=TRUE)
+    
     #apply mean function over each element (day) in list for average steps/day
     #return vector for plotting & later calcs
     MeanPerDay <- sapply(StepsByDay,mean)
@@ -43,8 +45,9 @@ activity <- read.csv(file_in)
 Mean number of steps per day is `r meanSPD`. Median number of steps per day is `r medianSPD`
 
 ## What is the average daily activity pattern?
-```{r}
+```{r mean_activity_by_interval}
 dailypattern <- function(activity,maintitle,x_label,y_label) {
+    
     #split data by interval (drop date)
     aveAct <- with(activity, split(steps, interval))
     
@@ -67,28 +70,34 @@ dailypattern <- function(activity,maintitle,x_label,y_label) {
     
     #determine index of max mean steps
     mval <- which.max(mpd$meansteps)
+    
     #determine value of max mean steps
     msteps <- mpd$meansteps[mval]
+    
     #determine interval of max mean steps
     minterval <- mpd$interval[mval]
+    
+    # output mean and interval
     out <- paste0(maintitle, ": The maximum mean of ", msteps, " steps is at interval ", minterval, ".")
     out
 }
 ```
 
 ```{r}
- dailypattern(activity,"Average daily pattern","Interval", "Average Steps")
+ dailypattern(activity,"Average daily activity pattern","Interval", "Average Steps")
 
 ```
 
-```{r}
+```{r stepstats_function}
  ## function for later use - mean and median stats
 stepstats <- function(activity) {
     #split file by date into list
     StepsByDay <- with(activity, split(steps, date))
+    
     #apply sum function over each element (day) in list for total steps
     #return vector for plotting & later calcs
     SumPerDay <- sapply(StepsByDay,sum, na.rm=TRUE)
+    
     #apply mean function over each element (day) in list for average steps/day
     #return vector for plotting & later calcs
     MeanPerDay <- sapply(StepsByDay,mean)
@@ -101,12 +110,14 @@ stepstats <- function(activity) {
 }
     ```
 ## Imputing missing values
-```{r}
+```{r missing_values}
     #determine total number of observations
     a<-dim(activity)
     totobs <- a[1]
+    
     # determine if steps = NA in dataset
     missing <- is.na(activity$steps)
+    
     # convert logical to count of NAs
     totmissing <- sum(missing)
     complete <- totobs - totmissing
@@ -114,7 +125,7 @@ stepstats <- function(activity) {
 
 The number of NAs in the dataset is `r totmissing` out of `r totobs` observations.
 
-```{r}
+```{r impute_values}
     # copy dataset
     new_activity <- activity
     
@@ -164,11 +175,32 @@ Since entire days had NA values, a step value of 0 replaced the NAs. The only ch
     stepstats(new_activity)
 
 ```
-The mean and mediam values for steps per day with imputed values are less that the previous calculation. This makes sense since, in the previous calculation,  NA values were removed before the calculation resulting in a data set of `r complete` observations for the mean and median calculations. When the missing values are imputed, there are `r totmissing` more observations.
+
+The mean and mediam values for steps per day with imputed values are less that the previous calculation. This makes sense since, in the previous calculation,  NA values were removed before the calculation resulting in a data set of `r complete` observations for the mean and median calculations. When the missing values are imputed, there are `r totmissing` more observations; both the mean and median values decreased accordingly.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r}
+```{r weekday_diffs}
+    
+    interval_ave <- function(activity,fact) {
+    #split data by interval (drop date)
+    aveAct <- with(activity, split(steps, interval))
+    
+    # calculate mean steps over all days at each interval
+    meanperday <- sapply(aveAct, mean, na.rm=TRUE)
+    
+    # get intervals from named vector
+    n <- names(meanperday)
+    
+    # convert character names to numeric
+    interval <- as.numeric(n)
+    
+    # create data frame  with means and intervals
+    ms <- as.vector(meanperday)
+    mpd <-data.frame(interval = interval, meansteps = meanperday, Factor = fact)
+    mpd
+}
+    
 new_activity$Date <- as.Date(as.character(new_activity$date))
     new_activity$weekday <- weekdays(new_activity$Date)
 
@@ -185,10 +217,16 @@ new_activity$Date <- as.Date(as.character(new_activity$date))
     # subset data frames by factors
     day_activity <- subset(new_activity, new_activity$weekday =="weekday")
     end_activity <- subset(new_activity, new_activity$weekday =="weekend")
-    dailypattern(day_activity, weekday,x,y)
+    
+    day <- interval_ave(day_activity, weekday)
+    end <- interval_ave(end_activity,weekend)
+    
+    #combine data frames of mean values
+    c <- rbind(day, end)
+    
+    #panel plot
+    p<- xyplot(meansteps ~ interval | Factor, c, type = "l", xlab ="Interval", ylab = "Average steps")
+    print(p)
 ```
 
-```{r}
- dailypattern(end_activity,weekend,x,y)
-```
 There is a clear difference in average weekday vs. weekend activity patterns. There appears to be more variation in activity during intervals throughout the day on weekends though the mean number of steps taken on the weekend is less than during the weekdays.
