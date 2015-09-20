@@ -153,6 +153,29 @@ The number of NAs in the dataset is 2304 out of 17568 observations.
     }
 
     # new_activity = dataset free of NAs
+    
+    # split file by date into list
+    StepsByDay <- with(new_activity, split(steps, date))
+    
+    # apply sum function over each element (day) in list for total steps
+    # return vector for plotting & later calcs
+    SumPerDay <- sapply(StepsByDay,sum, na.rm=TRUE)
+    
+    #apply mean function over each element (day) in list for average steps/day
+    #return vector for plotting & later calcs
+    MeanPerDay <- sapply(StepsByDay,mean)
+    meanSPD <- mean(MeanPerDay, na.rm=TRUE)
+    medianSPD <- median(MeanPerDay, na.rm=TRUE)
+
+    #plot graph of dataset with imputed values 
+    hist(SumPerDay, col = "red", main = "Total Steps Histogram - with imputed values", xlab = "Total Steps per Day")
+```
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
+
+Since entire days had NA values, a step value of 0 replaced the NAs. The only change to the histogram would be a slight increase in the frequency of the bar for a low number of steps (0-500)
+
+```r
     stepstats(new_activity)
 ```
 
@@ -184,7 +207,7 @@ new_activity$Date <- as.Date(as.character(new_activity$date))
     dailypattern(day_activity, weekday,x,y)
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
 
 ```
 ## [1] "weekday: The maximum mean of 202.888888888889 steps is at interval 835."
@@ -195,7 +218,7 @@ new_activity$Date <- as.Date(as.character(new_activity$date))
  dailypattern(end_activity,weekend,x,y)
 ```
 
-![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
 
 ```
 ## [1] "weekend: The maximum mean of 153.125 steps is at interval 915."
