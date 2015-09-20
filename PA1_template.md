@@ -14,7 +14,8 @@ Course Project 1 Overview:
 
 ## Loading and preprocessing the data
 
-```{r}
+
+```r
 file_in <- "activity.csv" 
 activity <- read.csv(file_in)
 ```
@@ -23,8 +24,8 @@ activity <- read.csv(file_in)
 ## What is mean total number of steps taken per day?
 
 
-```{r}
-    
+
+```r
  #split file by date into list
     StepsByDay <- with(activity, split(steps, date))
     #apply sum function over each element (day) in list for total steps
@@ -38,13 +39,15 @@ activity <- read.csv(file_in)
 
     #plot graph
     hist(SumPerDay, col = "green", main = "Total Steps Histogram", xlab = "Total Steps per Day")
-
 ```
 
-Mean number of steps per day is `r meanSPD`. Median number of steps per day is `r medianSPD`
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
+
+Mean number of steps per day is 37.3825996. Median number of steps per day is 37.3784722
 
 ## What is the average daily activity pattern?
-```{r}
+
+```r
 dailypattern <- function(activity,maintitle,x_label,y_label) {
     #split data by interval (drop date)
     aveAct <- with(activity, split(steps, interval))
@@ -77,12 +80,19 @@ dailypattern <- function(activity,maintitle,x_label,y_label) {
 }
 ```
 
-```{r}
- dailypattern(activity,"Average daily pattern","Interval", "Average Steps")
 
+```r
+ dailypattern(activity,"Average daily pattern","Interval", "Average Steps")
 ```
 
-```{r}
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+
+```
+## [1] "Average daily pattern: A max mean of 206.169811320755 steps at interval 835."
+```
+
+
+```r
  ## function for later use - mean and median stats
 stepstats <- function(activity) {
     #split file by date into list
@@ -100,9 +110,10 @@ stepstats <- function(activity) {
     out <- paste0("Mean steps per day = ", meanSPD, ". Median steps per day = ", medianSPD)
     out
 }
-    ```
+```
 ## Imputing missing values
-```{r}
+
+```r
     #determine total number of observations
     a<-dim(activity)
     totobs <- a[1]
@@ -112,9 +123,10 @@ stepstats <- function(activity) {
     totmissing <- sum(missing)
 ```
 
-The number of NAs in the dataset is `r totmissing` out of `r totobs` observations.
+The number of NAs in the dataset is 2304 out of 17568 observations.
 
-```{r}
+
+```r
     # copy dataset
     new_activity <- activity
     
@@ -142,13 +154,17 @@ The number of NAs in the dataset is `r totmissing` out of `r totobs` observation
 
     # new_activity = dataset free of NAs
     stepstats(new_activity)
+```
 
+```
+## [1] "Mean steps per day = 32.4799635701275. Median steps per day = 36.09375"
 ```
 The mean and mediam values for steps per day with imputed values are less that the previous calculation. This makes sense since, in the previous calculation,  NA values were removed before the calculation resulting in a data set of 15264 observations for the mean and median calculations. When the missing values are imputed, there are 2304 more observations.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r}
+
+```r
 new_activity$Date <- as.Date(as.character(new_activity$date))
     new_activity$weekday <- weekdays(new_activity$Date)
 
@@ -163,8 +179,19 @@ new_activity$Date <- as.Date(as.character(new_activity$date))
     dailypattern(day_activity, weekday,x,y)
 ```
 
-```{r}
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+
+```
+## [1] "weekday: A max mean of 202.888888888889 steps at interval 835."
+```
+
+
+```r
  dailypattern(end_activity,weekend,x,y)
+```
 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
 
+```
+## [1] "weekend: A max mean of 153.125 steps at interval 915."
 ```
