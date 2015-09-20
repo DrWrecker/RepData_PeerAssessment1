@@ -1,16 +1,15 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
-author: "D Arnelle"
-date: "September 19, 2015"
+date: "September 20, 2015"
 output: html_document
 ---
 
 Course Project 1 Overview: 
 - Read in file
-- Mean number of total steps per day taken calculated with graphic output and plotted
-- Average daily activity pattern calculated and plotted
-- Imputing misssing values and recalculation of of mean and median activity
-- Analysis of activity pattern on weekday vs. weekend
+- Calculate mean number of total steps per day taken with graphic output 
+- Calculate and plot average daily activity pattern by interval
+- Imput misssing values in dataset and recalculate of mean and median activity
+- Calculate and plot average daily activity pattern by interval comparing of activity pattern on weekdays vs. weekend
 
 ## Loading and preprocessing the data
 
@@ -43,7 +42,7 @@ activity <- read.csv(file_in)
 
 ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
 
-Mean number of steps per day is 37.3825996. Median number of steps per day is 37.3784722
+Mean number of steps per day is 37.383. Median number of steps per day is 37.378
 
 ## What is the average daily activity pattern?
 
@@ -75,7 +74,7 @@ dailypattern <- function(activity,maintitle,x_label,y_label) {
     msteps <- mpd$meansteps[mval]
     #determine interval of max mean steps
     minterval <- mpd$interval[mval]
-    out <- paste0(maintitle, ": A max mean of ", msteps, " steps at interval ", minterval, ".")
+    out <- paste0(maintitle, ": The maximum mean of ", msteps, " steps is at interval ", minterval, ".")
     out
 }
 ```
@@ -88,7 +87,7 @@ dailypattern <- function(activity,maintitle,x_label,y_label) {
 ![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
 
 ```
-## [1] "Average daily pattern: A max mean of 206.169811320755 steps at interval 835."
+## [1] "Average daily pattern: The maximum mean of 206.169811320755 steps is at interval 835."
 ```
 
 
@@ -121,6 +120,7 @@ stepstats <- function(activity) {
     missing <- is.na(activity$steps)
     # convert logical to count of NAs
     totmissing <- sum(missing)
+    complete <- totobs - totmissing
 ```
 
 The number of NAs in the dataset is 2304 out of 17568 observations.
@@ -174,6 +174,11 @@ new_activity$Date <- as.Date(as.character(new_activity$date))
     y <- "Average steps"
     new_activity$weekday <-sub("Saturday|Sunday","weekend", new_activity$weekday,)
     new_activity$weekday <-sub("Monday|Tuesday|Wednesday|Thursday|Friday","weekday", new_activity$weekday,)
+    
+    #treat weekend and weekday as factors
+    new_activity$weekday <- as.factor(new_activity$weekday)
+    
+    # subset data frames by factors
     day_activity <- subset(new_activity, new_activity$weekday =="weekday")
     end_activity <- subset(new_activity, new_activity$weekday =="weekend")
     dailypattern(day_activity, weekday,x,y)
@@ -182,7 +187,7 @@ new_activity$Date <- as.Date(as.character(new_activity$date))
 ![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
 
 ```
-## [1] "weekday: A max mean of 202.888888888889 steps at interval 835."
+## [1] "weekday: The maximum mean of 202.888888888889 steps is at interval 835."
 ```
 
 
@@ -193,5 +198,6 @@ new_activity$Date <- as.Date(as.character(new_activity$date))
 ![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
 
 ```
-## [1] "weekend: A max mean of 153.125 steps at interval 915."
+## [1] "weekend: The maximum mean of 153.125 steps is at interval 915."
 ```
+There is a clear difference in average weekday vs. weekend activity patterns. There appears to be more variation in activity during intervals throughout the day on weekends though the mean number of steps taken on the weekend is less than during the weekdays.
