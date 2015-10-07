@@ -18,34 +18,40 @@ Course Project 1 Overview:
 file_in <- "activity.csv" 
 activity <- read.csv(file_in)
 library(lattice)
+library(dplyr)
 ```
 
 
 ## What is mean total number of steps taken per day?
 
+```r
+ ## function for later use - mean and median stats
+stepstats <- function(activity) {
+        # factors to Date class
+    activity <- mutate(activity, date = as.Date(as.character(date)))
+
+    #group file by date
+    dateact <- group_by(activity,date)
+    
+    c <-summarise(dateact, total_steps = mean(sum(steps), na.rm =TRUE))
+    meanSPD <<- mean(c$total_steps, na.rm =TRUE)
+    medianSPD <<- median(c$total_steps, na.rm = TRUE)
+    c
+    
+}
+```
 
 
 ```r
-    # split file by date into list
-    StepsByDay <- with(activity, split(steps, date))
-
-    #apply sum function over each element (day) in list for total steps
-    #return vector for plotting & later calcs
-    SumPerDay <- sapply(StepsByDay,sum, na.rm=TRUE)
-    
-    #apply mean function over each element (day) in list for average steps/day
-    #return vector for plotting & later calcs
-    MeanPerDay <- sapply(StepsByDay,mean)
-    meanSPD <- mean(MeanPerDay, na.rm=TRUE)
-    medianSPD <- median(MeanPerDay, na.rm=TRUE)
+    c <- stepstats(activity)
 
     #plot graph
-    hist(SumPerDay, col = "green", main = "Total Steps Histogram", xlab = "Total Steps per Day")
+    hist(c$total_steps, breaks = 10, col = "green", main = "Total Steps Histogram", xlab = "Total Steps per Day")
 ```
 
 ![plot of chunk mean_activity](figure/mean_activity-1.png) 
 
-Mean number of steps per day is 37.383. Median number of steps per day is 37.378
+Mean number of steps per day is 10766.2. Median number of steps per day is   10765.
 
 ## What is the average daily activity pattern?
 
@@ -82,7 +88,7 @@ dailypattern <- function(activity,maintitle,x_label,y_label) {
     minterval <- mpd$interval[mval]
     
     # output mean and interval
-    out <- paste0(maintitle, ": The maximum mean of ", msteps, " steps is at interval ", minterval, ".")
+    out <- paste0(maintitle, ": The maximum mean of ", formatC(msteps, digits = 6), " steps is at interval ", minterval, ".")
     out
 }
 ```
@@ -95,31 +101,10 @@ dailypattern <- function(activity,maintitle,x_label,y_label) {
 ![plot of chunk unnamed-chunk-1](figure/unnamed-chunk-1-1.png) 
 
 ```
-## [1] "Average daily activity pattern: The maximum mean of 206.169811320755 steps is at interval 835."
+## [1] "Average daily activity pattern: The maximum mean of  206.17 steps is at interval 835."
 ```
 
 
-```r
- ## function for later use - mean and median stats
-stepstats <- function(activity) {
-    #split file by date into list
-    StepsByDay <- with(activity, split(steps, date))
-    
-    #apply sum function over each element (day) in list for total steps
-    #return vector for plotting & later calcs
-    SumPerDay <- sapply(StepsByDay,sum, na.rm=TRUE)
-    
-    #apply mean function over each element (day) in list for average steps/day
-    #return vector for plotting & later calcs
-    MeanPerDay <- sapply(StepsByDay,mean)
-    meanSPD <- mean(MeanPerDay, na.rm=TRUE)
-    medianSPD <- median(MeanPerDay, na.rm=TRUE)
-    
-    #print mean and median number of steps
-    out <- paste0("Mean steps per day = ", meanSPD, ". Median steps per day = ", medianSPD)
-    out
-}
-```
 ## Imputing missing values
 
 ```r
@@ -165,35 +150,21 @@ The number of NAs in the dataset is 2304 out of 17568 observations.
     }
 
     # new_activity = dataset free of NAs
-    
-    # split file by date into list
-    StepsByDay <- with(new_activity, split(steps, date))
-    
-    # apply sum function over each element (day) in list for total steps
-    # return vector for plotting & later calcs
-    SumPerDay <- sapply(StepsByDay,sum, na.rm=TRUE)
-    
-    #apply mean function over each element (day) in list for average steps/day
-    #return vector for plotting & later calcs
-    MeanPerDay <- sapply(StepsByDay,mean)
-    meanSPD <- mean(MeanPerDay, na.rm=TRUE)
-    medianSPD <- median(MeanPerDay, na.rm=TRUE)
-
-    #plot graph of dataset with imputed values 
-    hist(SumPerDay, col = "red", main = "Total Steps Histogram - with imputed values", xlab = "Total Steps per Day")
 ```
-
-![plot of chunk impute_values](figure/impute_values-1.png) 
-
-Since entire days had NA values, a step value of 0 replaced the NAs. The only change to the histogram would be a slight increase in the frequency of the bar for a low number of steps (0-500)
+    
 
 ```r
-    stepstats(new_activity)
+    c <- stepstats(new_activity)
+
+    #plot graph of dataset with imputed values 
+    hist(c$total_steps, breaks = 10, col = "red", main = "Total Steps Histogram - with imputed values", xlab = "Total Steps per Day")
 ```
 
-```
-## [1] "Mean steps per day = 32.4799635701275. Median steps per day = 36.09375"
-```
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
+
+Since entire days had NA values, a step value of 0 replaced the NAs. The only change to the histogram would be an increase in the frequency of the bar for a low number of steps (0-~1250)
+
+Mean number of steps per day is 9354.23. Median number of steps per day is   10395.
 
 The mean and mediam values for steps per day with imputed values are less that the previous calculation. This makes sense since, in the previous calculation,  NA values were removed before the calculation resulting in a data set of 15264 observations for the mean and median calculations. When the missing values are imputed, there are 2304 more observations; both the mean and median values decreased accordingly.
 
