@@ -103,7 +103,7 @@ the dataset.
 ### Imputing missing values
 
 Note that there are a number of days/intervals where there are missing
-values (coded as `NA`). The presence of missing days may introduce
+values (coded as `NA`). The presence of missing days will introduce
 bias into some calculations or summaries of the data.
 
 1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with `NA`s)

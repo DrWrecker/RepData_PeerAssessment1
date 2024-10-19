@@ -1,31 +1,34 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-date: "September 20, 2015"
+title: 'Reproducible Research: Project 1'
+author: "D Arnelle"
+date: "`r Sys.Date()`"
 output: html_document
 ---
 
-Course Project 1 Overview: 
-- Read in file
-- Calculate mean number of total steps per day taken with graphic output 
-- Calculate and plot average daily activity pattern by interval
-- Imput misssing values in dataset and recalculate of mean and median activity
-- Calculate and plot average daily activity pattern by interval comparing of activity pattern on weekdays vs. weekend
 
-## Loading and preprocessing the data
+Course Project 1 Overview: 
+1.  Read in file from Internet
+2.  Calculate mean number of total steps per day taken with graphic output 
+3.  Calculate and plot average daily activity pattern by interval
+4.  Imput missing values in data set and recalculate of mean and median activity
+5.  Calculate and plot average daily activity pattern by interval comparing of activity pattern on weekdays vs. weekend
+
+## Loading libraries and the data
 
 ```{r filein}
-file_in <- "activity.csv" 
-activity <- read.csv(file_in)
 library(lattice)
 library(dplyr)
+library(data.table)
+activity <- fread("curl https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip | funzip")
+
 ```
 
 
 ## What is mean total number of steps taken per day?
-```{r stepstats_function}
+```{r stepstats_function, echo = TRUE}
  ## function for later use - mean and median stats
 stepstats <- function(activity) {
-        # factors to Date class
+    # factors to Date class
     activity <- mutate(activity, date = as.Date(as.character(date)))
 
     #group file by date
@@ -35,11 +38,10 @@ stepstats <- function(activity) {
     meanSPD <<- mean(c$total_steps, na.rm =TRUE)
     medianSPD <<- median(c$total_steps, na.rm = TRUE)
     c
-    
-}
-    ```
+    }
+```
 
-```{r mean_activity}
+```{r mean_activity, echo = TRUE}
     c <- stepstats(activity)
 
     #plot graph
@@ -47,10 +49,10 @@ stepstats <- function(activity) {
 
 ```
 
-Mean number of steps per day is `r formatC(meanSPD, digits = 6)`. Median number of steps per day is `r formatC(medianSPD, digits =6)`.
+Mean number of steps per day is `r formatC(meanSPD, digits = 6)`. Median number of steps per day is `r formatC(medianSPD, digits = 6)`.
 
 ## What is the average daily activity pattern?
-```{r mean_activity_by_interval}
+```{r mean_activity_by_interval, echo = TRUE}
 dailypattern <- function(activity,maintitle,x_label,y_label) {
     
     #split data by interval (drop date)
@@ -88,14 +90,14 @@ dailypattern <- function(activity,maintitle,x_label,y_label) {
 }
 ```
 
-```{r}
+```{r, echo = TRUE}
  dailypattern(activity,"Average daily activity pattern","Interval", "Average Steps")
 
 ```
 
 
 ## Imputing missing values
-```{r missing_values}
+```{r missing_values, echo = TRUE}
     #determine total number of observations
     a<-dim(activity)
     totobs <- a[1]
@@ -110,8 +112,8 @@ dailypattern <- function(activity,maintitle,x_label,y_label) {
 
 The number of NAs in the dataset is `r totmissing` out of `r totobs` observations.
 
-```{r impute_values}
-    # copy dataset
+```{r impute_values, echo = TRUE}
+    # copy data set
     new_activity <- activity
     
     # make a list of daily means to replace NAs in new data set if needed
@@ -119,7 +121,7 @@ The number of NAs in the dataset is `r totmissing` out of `r totobs` observation
     temp1 <- with(new_activity, split(steps, date))
     daymeans <- lapply(temp1,mean)
     
-    # loop thru TRUE missing entries and assign NA to 0 or daily mean
+    # loop thru TRUE missing entries and assign 0 or daily mean to NA entries
     
     for (i in 1:length(missing)){
         if(missing[i] == TRUE) {
@@ -136,14 +138,14 @@ The number of NAs in the dataset is `r totmissing` out of `r totobs` observation
         }
     }
 
-    # new_activity = dataset free of NAs
-    ```
+    # new_activity = data set free of NAs
+```
     
-``` {r}
+``` {r imputed data plot, echo = TRUE}
     c <- stepstats(new_activity)
 
-    #plot graph of dataset with imputed values 
-    hist(c$total_steps, breaks = 10, col = "red", main = "Total Steps Histogram - with imputed values", xlab = "Total Steps per Day")
+    #plot graph of data set with imputed values 
+    hist(c$total_steps, breaks = 10, col = "blue", main = "Total Steps Histogram - with imputed values", xlab = "Total Steps per Day")
 ```
 
 Since entire days had NA values, a step value of 0 replaced the NAs. The only change to the histogram would be an increase in the frequency of the bar for a low number of steps (0-~1250)
@@ -154,7 +156,7 @@ The mean and mediam values for steps per day with imputed values are less that t
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r weekday_diffs}
+```{r weekday_diffs, echo = TRUE}
     
     interval_ave <- function(activity,fact) {
     #split data by interval (drop date)
